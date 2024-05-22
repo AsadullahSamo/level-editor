@@ -44,6 +44,11 @@ export default function Container() {
 		// 	}
     // };
 
+		useEffect(() => {
+			const bgColor = getComputedStyle(document.documentElement).getPropertyValue('.bg-gradient-to-r')
+			console.log(bgColor)
+		}, [])
+
     const handleMouseUp = () => {
         setIsDrawing(false);
     };
@@ -157,7 +162,7 @@ export default function Container() {
 
 
   return (
-    <main className="flex flex-col items-center overflow-auto">
+    <main className="flex flex-col items-center w-[100%] bg-white">
 		
 		<div className='fixed left-0 w-[100px] h-[100%] bg-[#212121] flex flex-col flex-wrap gap-3 justify-center items-center' style={{zIndex: 10}}> 
 			{Array.from({ length: 16 }).map((_, index) => (
@@ -184,36 +189,47 @@ export default function Container() {
 			</ul>	
 		</div>
 
-		
-	  <table className="border-collapse mx-auto my-32 bg-white" style={{borderSpacing: 0, zoom: zoomValue, tableLayout: 'auto' }}>
-		<thead>
-			{Array.from({ length: 25 }).map((_, rowIndex) => (
-			<tr key={rowIndex} style={{ borderSpacing: 0 }}>
-				{Array.from({ length: 25 }).map((_, colIndex) => (
-					<td key={colIndex} className='relative p-0 m-0 border-collapse whitespace-nowrap' style={{ cursor: `url(${cursorIcon}), auto`, width: '64px', height: '64px', border: '1px solid black', padding: 0, margin: 0 }}
-						onClick={() => handleCellClick(rowIndex, colIndex)}
-						// onMouseMove={() => handleMouseMove(rowIndex, colIndex)}
-						// onMouseDown={() => handleMouseDown(rowIndex, colIndex)}
-					>
-					 {Array.isArray(tableData[rowIndex]?.[colIndex]) &&
-                tableData[rowIndex][colIndex].map((image, index) => (
-						<Image
-							className={`hover:cursor-[url${cursorIcon},_pointer]`}
-							key={index}
-							src={image}
-							width={1}
-							height={1}
-							alt="Tile"
-							style={{ position: 'absolute', top: 0, left: 0, width: '64px', height: '64px', objectFit: 'cover', cursor: `url(${cursorIcon}), auto`, padding: 0, margin: 0 }}
-						/>
+		<div className={`mx-auto ${zoomValue <=1 ? 'pb-16' : 'pb-16'} ${zoomValue >= 1.4 ? 'pt-[280px]' : 'pt-[250px]'} px-[150px]`} style={{ transform: `scale(${zoomValue})`, transformOrigin: 'center center' }}>
+			<table className="border-collapse bg-white" style={{borderSpacing: 0}}>
+			<thead>
+				{Array.from({ length: 25 }).map((_, rowIndex) => (
+				<tr key={rowIndex} style={{ borderSpacing: 0 }}>
+					{Array.from({ length: 25 }).map((_, colIndex) => (
+						<td key={colIndex} className={`relative p-0 m-0 border-collapse whitespace-nowrap`} style={{ width: '44px', height: '44px', border: '1px solid black', padding: 0, margin: 0 }}
+							onClick={() => handleCellClick(rowIndex, colIndex)}
+							// onMouseMove={() => handleMouseMove(rowIndex, colIndex)}
+							// onMouseDown={() => handleMouseDown(rowIndex, colIndex)}
+						>
+							<style jsx>{`
+									td {
+										cursor: url(${cursorIcon}), auto;
+									}
+									td:hover {
+										background-image: url(${cursorIcon});
+										opacity: 0.5;
+									}
+								`}
+							</style>
+
+						{Array.isArray(tableData[rowIndex]?.[colIndex]) &&
+									tableData[rowIndex][colIndex].map((image, index) => (
+							<Image
+								className={`hover:cursor-[url${cursorIcon},_pointer]`}
+								key={index}
+								src={image}
+								width={1}
+								height={1}
+								alt="Tile"
+								style={{ position: 'absolute', top: 0, left: 0, width: '44px', height: '44px', objectFit: 'cover', cursor: `url(${cursorIcon}), auto`, padding: 0, margin: 0 }}
+							/>
+						))}
+				</td>
 					))}
-			</td>
+				</tr>
 				))}
-			</tr>
-			))}
-		</thead>
-	</table>
-	
+			</thead>
+		</table>
+	</div>	
 
 
 
