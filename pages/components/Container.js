@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, act } from 'react'
 import Image from 'next/image'
 import cursor from '../../styles/Cursor.module.css'
 import Feature from './Feature';
@@ -7,17 +7,16 @@ import Dialog from './Dialog';
 
 export default function Container() {
 
+	let [intervalId, setIntervalId] = useState(null);
+	let [check, setCheck] = useState(null);
 	const [tableData, setTableData] = useState(Array.from({ length: 25 }, () => Array.from({ length: 25 }, () => '')));
 	const [assetAddedIndex, setAssetAddedIndex] = useState([]);
 	const [cursorIcon, setCursorIcon] = useState('/assets/tiles/svg/tile-10.svg');
 	const [zoomValue, setZoomValue] = useState(1);
-	const [xCoord, setXCoord] = useState(0);
-	const [yCoord, setYCoord] = useState(0);
 	const [active, setActive] = useState('');
 	const [currentAsset, setCurrentAsset] = useState('/assets/tiles/svg/tile-10.svg')
 	const [cursorIndex, setCursorIndex] = useState(0)
-	const [isDrawing, setIsDrawing] = useState(false)
-	const [images, setImages] = useState([])
+	const [isDrawing, setIsDrawing] = useState(false);
 
 	const handleClick = (index) => {
 		setActive('draw');
@@ -26,28 +25,24 @@ export default function Container() {
 		setCursorIndex(index)
 	};
 	
-	// const handleMouseDown = (rowIndex, colIndex) => {
-	// 	setIsDrawing(true);
-	// 	if (active === 'erase') {
-	// 		eraseAsset(rowIndex, colIndex);
-	// 	} else {
-	// 		drawImage(rowIndex, colIndex);
-	// 	}
-	// };
+	const handleMouseDown = (rowIndex, colIndex) => {
+		setIsDrawing(true);
+		if (active === 'erase') {
+			eraseAsset(rowIndex, colIndex);
+		} else if(active === 'draw') {
+			drawImage(rowIndex, colIndex);
+		}
+	};
 
-    // const handleMouseMove = (rowIndex, colIndex) => {
-		// 	if (!isDrawing) return;
-		// 	if (active === 'erase') {
-		// 		eraseAsset(rowIndex, colIndex);
-		// 	} else {
-		// 		drawImage(rowIndex, colIndex);
-		// 	}
-    // };
-
-		useEffect(() => {
-			const bgColor = getComputedStyle(document.documentElement).getPropertyValue('.bg-gradient-to-r')
-			console.log(bgColor)
-		}, [])
+	const handleMouseMove = (rowIndex, colIndex) => {
+		if (isDrawing) {
+			if (active === 'erase') {
+				eraseAsset(rowIndex, colIndex);
+			} else if(active === 'draw') {
+				drawImage(rowIndex, colIndex);
+			}
+		}
+	};
 
     const handleMouseUp = () => {
         setIsDrawing(false);
@@ -110,32 +105,28 @@ export default function Container() {
 			newTableData[rowIndex][colIndex] = '';
 		}
 		setTableData(newTableData);
-		const newAssetAddedIndex = [...assetAddedIndex];
-		// newAssetAddedIndex.forEach((asset, index) => {
-		// 	if (asset.rowIndex === rowIndex && asset.colIndex === colIndex) {
-		// 		newAssetAddedIndex.splice(index, 1);
-		// 	}
-		// });
-		newAssetAddedIndex.splice(newAssetAddedIndex.findIndex(asset => asset.rowIndex === rowIndex && asset.colIndex === colIndex), 1);
+		const newAssetAddedIndex = assetAddedIndex.filter(asset => asset.rowIndex !== rowIndex || asset.colIndex !== colIndex);
 		setAssetAddedIndex(newAssetAddedIndex);
 	};
 
 	const handleCellClick = (rowIndex, colIndex) => {
-    if (active === 'erase') {
-				eraseAsset(rowIndex, colIndex);
-    } else if(active === 'draw') {
+		if (active === 'erase') {
+			eraseAsset(rowIndex, colIndex);
+		} else if(active === 'draw') {
 			drawImage(rowIndex, colIndex);
 		}
 	};
 	
 	const drawImage = (rowIndex, colIndex) => {
-    setActive('draw');
-    const newTableData = [...tableData];
-    if(rowIndex !== undefined && colIndex !== undefined) {
-			tableData[rowIndex][colIndex] === '' ? tableData[rowIndex][colIndex] = [currentAsset] : tableData[rowIndex][colIndex].push(currentAsset);
+		setActive('draw');
+		const newTableData = [...tableData];
+		if(rowIndex !== undefined && colIndex !== undefined) {
+				tableData[rowIndex][colIndex] === '' ? tableData[rowIndex][colIndex] = [currentAsset] : tableData[rowIndex][colIndex].push(currentAsset);
+			}
+		setTableData(newTableData);
+		if(!assetAddedIndex.find(asset => asset.rowIndex === rowIndex && asset.colIndex === colIndex)) {
+			setAssetAddedIndex([...assetAddedIndex, {rowIndex, colIndex}]);
 		}
-    setTableData(newTableData);
-		setAssetAddedIndex([...assetAddedIndex, {rowIndex, colIndex}]);
 	};
 
 	useEffect(() => {
@@ -149,7 +140,7 @@ export default function Container() {
 		return () => {
 			window.removeEventListener('mouseup', handleMouseUp);
 		};
-	}, []);
+	}, [tableData]);
 	
 	
 	useEffect(() => {
@@ -195,15 +186,12 @@ export default function Container() {
 				{Array.from({ length: 25 }).map((_, rowIndex) => (
 				<tr key={rowIndex} style={{ borderSpacing: 0 }}>
 					{Array.from({ length: 25 }).map((_, colIndex) => (
-						<td key={colIndex} className={`relative p-0 m-0 border-collapse whitespace-nowrap`} style={{ width: '44px', height: '44px', border: '1px solid black', padding: 0, margin: 0 }}
-							onClick={() => handleCellClick(rowIndex, colIndex)}
-							// onMouseMove={() => handleMouseMove(rowIndex, colIndex)}
-							// onMouseDown={() => handleMouseDown(rowIndex, colIndex)}
+						<td key={colIndex} className={`relative p-0 m-0 border-collapse whitespace-nowrap`} style={{cursor: `${active === 'undo' ? 'default' : `url(${cursorIcon}), auto`}`, width: '44px', height: '44px', border: '1px solid black', padding: 0, margin: 0 }}
+							// onClick={() => handleCellClick(rowIndex, colIndex)}
+							onMouseDown={() => handleMouseDown(rowIndex, colIndex)}
+							onMouseMove={() => handleMouseMove(rowIndex, colIndex)}
 						>
 							<style jsx>{`
-									td {
-										cursor: url(${cursorIcon}), auto;
-									}
 									td:hover {
 										background-image: url(${cursorIcon});
 										opacity: 0.5;
@@ -231,20 +219,6 @@ export default function Container() {
 		</table>
 	</div>	
 
-
-
-
-				
-
-				
-		{/* {images && images.map((image, index) => (
-			<React.Fragment key={index}>
-				<Image className={`hover:cursor-[url${cursorIcon},_pointer]`} src={image.src} width={1} height={1} alt="Tile" style={{width: '32px', height: '32px', position: 'absolute', objectFit: 'contain', top: `${image.y}px`, left: `${image.x}px`, cursor: `url(${cursorIcon}), auto`, zIndex: 10}}/>
-			</React.Fragment>
-		))} */}
-
-
-		{/* </div> */}
 
 		<div className='w-[100vw] h-[40px] bg-[#393939] mt-10 self-end fixed bottom-0 left-[0rem]'> 
 			<p className={`text-white px-3 ${fonts.montSerratMedium} pt-1 text-xl text-center w-[5%] h-[40px] bg-[#212121] absolute left-[6.2rem]`}> {Math.round(zoomValue * 100)}% </p>
