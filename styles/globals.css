@@ -2,7 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: Montserrat-Medium;
+  src: url('../public/assets/fonts/Montserrat-Medium.ttf');
+}
 
-.bg-gradient-to-r {
-  color: red
+.tooltip {
+  --tooltip-color: #000;
+  --tooltip-text-color: #FFF;
+  --tooltip-font-family: Montserrat-Medium;
 }
