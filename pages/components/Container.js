@@ -1,7 +1,26 @@
 import React, { useState, useEffect, act } from 'react'
 import Image from 'next/image'
 import fonts from '../../styles/Fonts.module.css'
+import styled from 'styled-components'
 
+// <td key={colIndex} className={`${tableData[rowIndex][colIndex] === '' ? 'border-[1px] border-black' : 'border-none'} relative p-0 m-0 border-collapse whitespace-nowrap`} style={{cursor: `${active === 'undo' || active === '' ? 'default' : `url(${cursorIcon}), auto`}`, width: '44px', height: '44px', padding: 0, margin: 0 }}
+const StyledTD = styled.td`
+	cursor: ${(props) => props.active === 'undo' || props.active === '' ? 'default' : `url(${props.cursorIcon}), auto`};
+	width: 44px;
+	height: 44px;
+	padding: 0;
+	margin: 0;
+	position: relative;
+	border-collapse: collapse;
+	white-space: nowrap;
+	// border: ${(props) => props.border === '' ? '1px solid black' : 'none'};
+	// border: 1px solid black;
+
+	&:hover {
+		background-image: ${(props) => (props.bgImage === '' ? `url(${props.cursorIcon})` : 'none')};
+		opacity: 0.5;
+	}
+`
 
 export default function Container() {
 
@@ -206,7 +225,7 @@ export default function Container() {
 		{/* Features */}
 		<div className='w-[100%] h-[40px] bg-[#393939] fixed top-[0%] border-[1px] border-[#7a7a7a]' style={{zIndex: 10}}>
 			<ul className='flex gap-5 justify-start pl-3 w-[16%] border-l-[1px] border-[#7a7a7a] h-[37px] bg-[#212121] absolute left-[6.4rem]'> 
-						<Image onClick={getCurrentAsset} src={currentAsset} className={`${active === 'draw' ? 'bg-blue-500' : ''} px-2 w-10 hover:cursor-pointer`} width={24} height={24} style={{objectFit: 'contain'}}/>
+					<Image onClick={getCurrentAsset} src={currentAsset} className={`${active === 'draw' ? 'bg-blue-500' : ''} px-2 w-10 hover:cursor-pointer`} width={24} height={24} style={{objectFit: 'contain'}}/>
 					<span className='tooltip tooltip-bottom' data-tip="Undo (Ctrl + Z)">
 						<Image onClick={undoMove} src={`/assets/icons/undo-icon.svg`} className={`py-[6px] hover:cursor-pointer px-2 ${active === "undo" ? 'bg-blue-500' : ''} `} width={42} height={42} style={{objectFit: 'contain'}}/>
 					</span>
@@ -252,17 +271,18 @@ export default function Container() {
 				{Array.from({ length: numberOfRows }).map((_, rowIndex) => (
 				<tr key={rowIndex} style={{ borderSpacing: 0 }}>
 					{Array.from({ length: numberOfCols }).map((_, colIndex) => (
-						<td key={colIndex} className={`relative p-0 m-0 border-collapse whitespace-nowrap`} style={{cursor: `${active === 'undo' ? 'default' : `url(${cursorIcon}), auto`}`, width: '44px', height: '44px', border: '1px solid black', padding: 0, margin: 0 }}
+						// <td key={colIndex} className={`${tableData[rowIndex][colIndex] === '' ? 'border-[1px] border-black' : 'border-none'} relative p-0 m-0 border-collapse whitespace-nowrap`} style={{cursor: `${active === 'undo' || active === '' ? 'default' : `url(${cursorIcon}), auto`}`, width: '44px', height: '44px', padding: 0, margin: 0 }}
+						<StyledTD
+							key={colIndex}
+							className={`${tableData[rowIndex][colIndex] === '' ? 'border-[1px] border-black' : 'border-none'} ${tableData[rowIndex][colIndex] === '' ? 'border-[1px] border-black' : 'border-none'} relative p-0 m-0 border-collapse whitespace-nowrap`}
+							style={{cursor: `${active === 'undo' || active === '' ? 'default' : `url(${cursorIcon}), auto`}`, width: '44px', height: '44px', padding: 0, margin: 0 }}
+							active={active}
+							border={tableData[rowIndex][colIndex]}
+							bgImage={tableData[rowIndex][colIndex]}
 							onMouseDown={() => handleMouseDown(rowIndex, colIndex)}
 							onMouseMove={() => handleMouseMove(rowIndex, colIndex)}
-						>
-							<style jsx>{`
-									td:hover {
-										background-image: url(${cursorIcon});
-										opacity: 0.5;
-									}
-								`}
-							</style>
+							cursorIcon={cursorIcon}
+						>							
 
 						{Array.isArray(tableData[rowIndex]?.[colIndex]) &&
 									tableData[rowIndex][colIndex].map((image, index) => (
@@ -276,7 +296,8 @@ export default function Container() {
 								style={{ position: 'absolute', top: 0, left: 0, width: '44px', height: '44px', objectFit: 'cover', cursor: `url(${cursorIcon}), auto`, padding: 0, margin: 0 }}
 							/>
 						))}
-				</td>
+					{/* </td> */}
+					</StyledTD>
 					))}
 				</tr>
 				))}
