@@ -3,7 +3,6 @@ import Image from 'next/image'
 import fonts from '../../styles/Fonts.module.css'
 import styled from 'styled-components'
 
-// <td key={colIndex} className={`${tableData[rowIndex][colIndex] === '' ? 'border-[1px] border-black' : 'border-none'} relative p-0 m-0 border-collapse whitespace-nowrap`} style={{cursor: `${active === 'undo' || active === '' ? 'default' : `url(${cursorIcon}), auto`}`, width: '44px', height: '44px', padding: 0, margin: 0 }}
 const StyledTD = styled.td`
 	cursor: ${(props) => props.active === 'undo' || props.active === '' ? 'default' : `url(${props.cursorIcon}), auto`};
 	width: 44px;
@@ -13,11 +12,12 @@ const StyledTD = styled.td`
 	position: relative;
 	border-collapse: collapse;
 	white-space: nowrap;
-	// border: ${(props) => props.border === '' ? '1px solid black' : 'none'};
+	border: ${(props) => props.bgImage === '' ? '1px solid black' : 'none'};
 	// border: 1px solid black;
 
 	&:hover {
 		background-image: ${(props) => (props.bgImage === '' ? `url(${props.cursorIcon})` : 'none')};
+		background-size: 44px 44px;
 		opacity: 0.5;
 	}
 `
@@ -45,6 +45,10 @@ export default function Container() {
 		setCursorIcon(`/assets/tiles/svg/tile-${index}.svg`);
 		setCursorIndex(index)
 	};
+
+	const updateTableDimensions = () => {
+		setTableData(Array.from({ length: numberOfRows }, () => Array.from({ length: numberOfCols }, () => '')));
+	};
 	
 	const handleMouseDown = (rowIndex, colIndex) => {
 		setIsDrawing(true);
@@ -61,6 +65,7 @@ export default function Container() {
 				eraseAsset(rowIndex, colIndex);
 			} else if(active === 'draw') {
 				drawImage(rowIndex, colIndex);
+
 			}
 		}
 	};
@@ -95,9 +100,6 @@ export default function Container() {
 	const erase = () => {
 		setActive('erase');
 		setCursorIcon('/assets/icons/rubber-icon.svg');
-    // const newTableData = [...tableData];
-    // newTableData[rowIndex][colIndex] = '';
-    // setTableData(newTableData);
 	};
 	
 	const zoomIn = () => {
@@ -117,7 +119,7 @@ export default function Container() {
 	};
 
 	const handleSettingsClick = () => {
-		setActive('settings');
+		active === 'settings' ? setActive('') : setActive('settings');
 	};
 
 
@@ -129,14 +131,6 @@ export default function Container() {
 		setTableData(newTableData);
 		const newAssetAddedIndex = assetAddedIndex.filter(asset => asset.rowIndex !== rowIndex || asset.colIndex !== colIndex);
 		setAssetAddedIndex(newAssetAddedIndex);
-	};
-
-	const handleCellClick = (rowIndex, colIndex) => {
-		if (active === 'erase') {
-			eraseAsset(rowIndex, colIndex);
-		} else if(active === 'draw') {
-			drawImage(rowIndex, colIndex);
-		}
 	};
 	
 	const drawImage = (rowIndex, colIndex) => {
@@ -153,10 +147,12 @@ export default function Container() {
 
 	const handleRowsChange = (e) => {
 		setRows(e.target.value);
+		console.log(numberOfRows)
 	};
 
 	const handleColsChange = (e) => {
 		setCols(e.target.value);
+		console.log(e.target.value)
 	};
 
 	const errorMessageDisplay = (dimension, setDimension, message) => {
@@ -169,7 +165,6 @@ export default function Container() {
 	};
 
 	const apply = () => {
-
 		if(rows < 5)  {
 			errorMessageDisplay(5, setRows, 'Rows cannot be less than 5');
 			setNumberOfRows(15);
@@ -189,8 +184,8 @@ export default function Container() {
 	};
 
 	useEffect(() => {
-		console.log(assetAddedIndex)
-	}, [assetAddedIndex])
+		updateTableDimensions();
+	}, [numberOfRows, numberOfCols]);
 	
 	
 	useEffect(() => {
@@ -211,7 +206,7 @@ export default function Container() {
 	}, [tableData]);
 
   return (
-    <main className="flex flex-col items-center w-[100%] bg-white min-h-screen">
+    <main className={`flex flex-col items-center w-[100%] bg-white ${zoomValue <=1 ? 'min-h-screen' : 'h-[150vh]'}`}>
 		
 		<div className='fixed left-0 w-[100px] h-[100%] bg-[#212121] flex flex-col flex-wrap gap-3 justify-center items-center' style={{zIndex: 10}}> 
 			{Array.from({ length: 16 }).map((_, index) => (
@@ -237,6 +232,8 @@ export default function Container() {
 				<Image onClick={zoomIn} src={`/assets/icons/zoom-in-icon.svg`} className={`hover:cursor-pointer px-2 ${active === "zoomIn" ? 'bg-blue-500' : ''} `} width={42} height={42} style={{objectFit: 'contain'}}/>
 				<Image onClick={zoomOut} src={`/assets/icons/zoom-out-icon.svg`} className={`hover:cursor-pointer px-2 ${active === "zoomOut" ? 'bg-blue-500' : ''} `} width={42} height={42} style={{objectFit: 'contain'}}/>
 			</ul>	
+
+			{/* Settings */}
 			<ul className='flex gap-5 justify-center w-[4%] border-l-[1px] border-[#7a7a7a] h-[37px] bg-[#212121] float-right'> 
 				<Image onClick={handleSettingsClick} src={`/assets/icons/settings-icon.svg`} className={`hover:cursor-pointer px-2 ${active === "settings" ? 'bg-blue-500' : ''} `} width={42} height={42} style={{objectFit: 'contain'}}/>		
 					
@@ -265,25 +262,22 @@ export default function Container() {
 			</ul>	
 		</div>
 
-		<div className={`mx-auto ${zoomValue <=1 ? 'pb-16' : 'pb-16'} ${zoomValue >= 1.4 ? 'pt-[280px]' : 'pt-[250px]'} px-[150px]`} style={{ transform: `scale(${zoomValue})`, transformOrigin: 'center center' }}>
+		{/* Table */}
+		<div className={`bg-white mx-auto ${zoomValue <=1 ? 'pb-16' : 'pb-16'} ${zoomValue >= 1.4 ? 'pt-[280px]' : 'pt-[250px]'} px-[150px]`} style={{ transform: `scale(${zoomValue})`, transformOrigin: 'center center' }}>
 			<table className="border-collapse bg-white" style={{borderSpacing: 0}}>
 			<thead>
 				{Array.from({ length: numberOfRows }).map((_, rowIndex) => (
-				<tr key={rowIndex} style={{ borderSpacing: 0 }}>
+				<tr key={rowIndex} style={{ borderSpacing: 0, border: '1px solid black' }}>
 					{Array.from({ length: numberOfCols }).map((_, colIndex) => (
-						// <td key={colIndex} className={`${tableData[rowIndex][colIndex] === '' ? 'border-[1px] border-black' : 'border-none'} relative p-0 m-0 border-collapse whitespace-nowrap`} style={{cursor: `${active === 'undo' || active === '' ? 'default' : `url(${cursorIcon}), auto`}`, width: '44px', height: '44px', padding: 0, margin: 0 }}
 						<StyledTD
 							key={colIndex}
-							className={`${tableData[rowIndex][colIndex] === '' ? 'border-[1px] border-black' : 'border-none'} ${tableData[rowIndex][colIndex] === '' ? 'border-[1px] border-black' : 'border-none'} relative p-0 m-0 border-collapse whitespace-nowrap`}
+							className={`${tableData[rowIndex]?.[colIndex] === '' ? 'border-[1px] border-black' : 'border-none'} relative p-0 m-0 border-collapse whitespace-nowrap`}
 							style={{cursor: `${active === 'undo' || active === '' ? 'default' : `url(${cursorIcon}), auto`}`, width: '44px', height: '44px', padding: 0, margin: 0 }}
-							active={active}
-							border={tableData[rowIndex][colIndex]}
-							bgImage={tableData[rowIndex][colIndex]}
+							bgImage={tableData[rowIndex]?.[colIndex] || ''}
 							onMouseDown={() => handleMouseDown(rowIndex, colIndex)}
 							onMouseMove={() => handleMouseMove(rowIndex, colIndex)}
 							cursorIcon={cursorIcon}
 						>							
-
 						{Array.isArray(tableData[rowIndex]?.[colIndex]) &&
 									tableData[rowIndex][colIndex].map((image, index) => (
 							<Image
@@ -296,7 +290,6 @@ export default function Container() {
 								style={{ position: 'absolute', top: 0, left: 0, width: '44px', height: '44px', objectFit: 'cover', cursor: `url(${cursorIcon}), auto`, padding: 0, margin: 0 }}
 							/>
 						))}
-					{/* </td> */}
 					</StyledTD>
 					))}
 				</tr>
@@ -306,9 +299,14 @@ export default function Container() {
 	</div>	
 
 
-		<div className='w-[100vw] h-[40px] bg-[#393939] mt-10 self-end fixed bottom-0 left-[0rem]'> 
-			<p className={`text-white px-3 ${fonts.montSerratMedium} pt-1 text-xl text-center w-[5%] h-[40px] bg-[#212121] absolute left-[6.2rem]`}> {Math.round(zoomValue * 100)}% </p>
+		{/* Zoom Value */}
+		<div className='w-[100vw] h-[40px] bg-[#393939] fixed left-[6.2rem] bottom-0 flex'> 
+			<p className={`text-white px-3 ${fonts.montSerratMedium} pt-1 text-xl text-center w-[5%] h-[40px] bg-[#212121]`} style={{borderRight: '1px solid #7a7a7a'}}> {`${numberOfRows}X${numberOfCols}`} </p>
+			<p className={`text-white px-3 ${fonts.montSerratMedium} pt-1 text-xl text-center w-[5%] h-[40px] bg-[#212121]`}> {Math.round(zoomValue * 100)}% </p>
 		</div>
+		
+		{/* <div className='w-[100vw] h-[40px] bg-[#393939] mt-10 self-end fixed bottom-0 left-[0rem]'> 
+		</div> */}
 
 	</main>
   )
