@@ -15,15 +15,17 @@ const StyledTD = styled.td`
 	border: ${(props) => props.bgImage === '' ? '1px solid black' : 'none'};
 	// border: 1px solid black;
 
-	&:hover {
-		background-image: ${(props) => (props.bgImage === '' ? `url(${props.cursorIcon})` : 'none')};
-		background-size: 44px 44px;
-		opacity: 0.5;
-	}
+	// &:hover {
+	// 	background-image: ${(props) => (props.bgImage === '' ? `url(${props.cursorIcon})` : 'none')};
+	// 	background-size: 44px 44px;
+	// 	// opacity: ${(props) => (props.bgImage === '' ? `0` : `0.5`)}
+	// }
 `
 
 export default function Container() {
 
+	const [windowWidth, setWindowWidth] = useState(0);
+	const [showMain, setShowMain] = useState(true);
 	const [showErrorMessage, setShowErrorMessage] = useState(false);
 	const [errorMessage, setMessage] = useState('');
 	const [rows, setRows] = useState(15);
@@ -205,7 +207,19 @@ export default function Container() {
 		};
 	}, [tableData]);
 
+	useEffect(() => {
+		window.addEventListener('resize', (e) => {
+			if(window.innerWidth < 1656) {
+				setShowMain(false)
+			} else {
+				setShowMain(true)
+			}
+		});
+	}, []);
+
   return (
+	<>
+	{showMain ? (
     <main className={`flex flex-col items-center w-[100%] bg-white ${zoomValue <=1 ? 'min-h-screen' : 'h-[150vh]'}`}>
 		
 		<div className='fixed left-0 w-[100px] h-[100%] bg-[#212121] flex flex-col flex-wrap gap-3 justify-center items-center' style={{zIndex: 10}}> 
@@ -269,7 +283,8 @@ export default function Container() {
 				{Array.from({ length: numberOfRows }).map((_, rowIndex) => (
 				<tr key={rowIndex} style={{ borderSpacing: 0, border: '1px solid black' }}>
 					{Array.from({ length: numberOfCols }).map((_, colIndex) => (
-						<StyledTD
+						<td
+							id='mytd'
 							key={colIndex}
 							className={`${tableData[rowIndex]?.[colIndex] === '' ? 'border-[1px] border-black' : 'border-none'} relative p-0 m-0 border-collapse whitespace-nowrap`}
 							style={{cursor: `${active === 'undo' || active === '' ? 'default' : `url(${cursorIcon}), auto`}`, width: '44px', height: '44px', padding: 0, margin: 0 }}
@@ -277,7 +292,17 @@ export default function Container() {
 							onMouseDown={() => handleMouseDown(rowIndex, colIndex)}
 							onMouseMove={() => handleMouseMove(rowIndex, colIndex)}
 							cursorIcon={cursorIcon}
-						>							
+						>
+							<style jsx>{`
+								#mytd:hover {
+									background-image: ${active === 'draw' ? `url(${cursorIcon})` : 'none'};
+									background-size: 44px 44px;
+									opacity: ${active === 'draw' ? 0.5 : 0}
+								}
+							`}</style>
+
+
+
 						{Array.isArray(tableData[rowIndex]?.[colIndex]) &&
 									tableData[rowIndex][colIndex].map((image, index) => (
 							<Image
@@ -290,7 +315,7 @@ export default function Container() {
 								style={{ position: 'absolute', top: 0, left: 0, width: '44px', height: '44px', objectFit: 'cover', cursor: `url(${cursorIcon}), auto`, padding: 0, margin: 0 }}
 							/>
 						))}
-					</StyledTD>
+					</td>
 					))}
 				</tr>
 				))}
@@ -309,6 +334,13 @@ export default function Container() {
 		</div> */}
 
 	</main>
+	) : (
+		<div className='flex flex-col items-center justify-center'>
+			<Image src='/assets/icons/no-mobile.svg' width={200} height={200}/>
+			<p className='text-2xl text-gray-500'> Please view on a larger screen </p>
+		</div>
+	)}
+	</>
   )
 
 }
