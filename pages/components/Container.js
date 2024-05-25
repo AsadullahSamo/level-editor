@@ -337,7 +337,7 @@ export default function Container() {
 	) : (
 		<div className='flex flex-col items-center justify-center'>
 			<Image src='/assets/icons/no-mobile.svg' width={200} height={200}/>
-			<p className='text-2xl text-gray-500'> Please view on a larger screen </p>
+			<p className='text-2xl text-gray-500'> The app is intended for viewing on a PC/laptop. Please use a larger screen </p>
 		</div>
 	)}
 	</>
