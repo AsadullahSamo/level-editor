@@ -25,7 +25,6 @@ const StyledTD = styled.td`
 
 export default function Container() {
 
-	
 	const [fileName, setFileName] = useState('Untitled');
 	const [showMain, setShowMain] = useState(true);
 	const [showErrorMessage, setShowErrorMessage] = useState(false);
@@ -353,9 +352,6 @@ export default function Container() {
 			<p className={`text-white px-3 ${fonts.montSerratMedium} pt-1 text-xl text-center w-[5%] h-[40px] bg-[#212121]`} style={{borderRight: '1px solid #7a7a7a'}}> {`${numberOfRows}X${numberOfCols}`} </p>
 			<p className={`text-white px-3 ${fonts.montSerratMedium} pt-1 text-xl text-center w-[5%] h-[40px] bg-[#212121]`}> {Math.round(zoomValue * 100)}% </p>
 		</div>
-		
-		{/* <div className='w-[100vw] h-[40px] bg-[#393939] mt-10 self-end fixed bottom-0 left-[0rem]'> 
-		</div> */}
 
 	</main>
 	) : (
