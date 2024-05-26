@@ -149,12 +149,10 @@ export default function Container() {
 
 	const handleRowsChange = (e) => {
 		setRows(e.target.value);
-		console.log(numberOfRows)
 	};
 
 	const handleColsChange = (e) => {
 		setCols(e.target.value);
-		console.log(e.target.value)
 	};
 
 	const errorMessageDisplay = (dimension, setDimension, message) => {
@@ -220,7 +218,7 @@ export default function Container() {
   return (
 	<>
 	{showMain ? (
-    <main className={`flex flex-col items-center w-[100%] bg-white ${zoomValue <=1 ? 'min-h-screen' : 'h-[150vh]'}`}>
+    <main className={`selection:bg-none flex flex-col items-center w-[100%] bg-white ${zoomValue <=1 ? 'min-h-screen' : 'h-[150vh]'}`}>
 		
 		<div className='fixed left-0 w-[100px] h-[100%] bg-[#212121] flex flex-col flex-wrap gap-3 justify-center items-center' style={{zIndex: 10}}> 
 			{Array.from({ length: 16 }).map((_, index) => (
@@ -243,13 +241,19 @@ export default function Container() {
 					</span>
 			</ul>
 			<ul className='flex gap-5 justify-center w-[7%] border-l-[1px] border-r-[1px] border-[#7a7a7a] h-[37px] bg-[#212121] absolute left-72'> 
-				<Image onClick={zoomIn} src={`/assets/icons/zoom-in-icon.svg`} className={`hover:cursor-pointer px-2 ${active === "zoomIn" ? 'bg-blue-500' : ''} `} width={42} height={42} style={{objectFit: 'contain'}}/>
-				<Image onClick={zoomOut} src={`/assets/icons/zoom-out-icon.svg`} className={`hover:cursor-pointer px-2 ${active === "zoomOut" ? 'bg-blue-500' : ''} `} width={42} height={42} style={{objectFit: 'contain'}}/>
+				<span className='tooltip tooltip-bottom' data-tip="zoom in">
+					<Image onClick={zoomIn} src={`/assets/icons/zoom-in-icon.svg`} className={`py-[6px] hover:cursor-pointer px-2 ${active === "zoomIn" ? 'bg-blue-500' : ''} `} width={42} height={42} style={{objectFit: 'contain'}}/>
+				</span>
+				<span className='tooltip tooltip-bottom' data-tip="zoom out">
+					<Image onClick={zoomOut} src={`/assets/icons/zoom-out-icon.svg`} className={`py-[6px] hover:cursor-pointer px-2 ${active === "zoomOut" ? 'bg-blue-500' : ''} `} width={42} height={42} style={{objectFit: 'contain'}}/>
+				</span>
 			</ul>	
 
 			{/* Settings */}
 			<ul className='flex gap-5 justify-center w-[4%] border-l-[1px] border-[#7a7a7a] h-[37px] bg-[#212121] float-right'> 
-				<Image onClick={handleSettingsClick} src={`/assets/icons/settings-icon.svg`} className={`hover:cursor-pointer px-2 ${active === "settings" ? 'bg-blue-500' : ''} `} width={42} height={42} style={{objectFit: 'contain'}}/>		
+				<span className='tooltip tooltip-bottom' data-tip="settings">
+					<Image onClick={handleSettingsClick} src={`/assets/icons/settings-icon.svg`} className={`py-[6px] hover:cursor-pointer px-2 ${active === "settings" ? 'bg-blue-500' : ''} `} width={42} height={42} style={{objectFit: 'contain'}}/>
+				</span>
 					
 					{active === 'settings' &&
 					<div className='rounded-md px-3 pt-1 w-[15%] h-[250px] bg-[#212121] absolute top-[3.2rem] right-[1rem]'>
