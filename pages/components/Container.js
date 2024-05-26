@@ -2,6 +2,7 @@ import React, { useState, useEffect, act } from 'react'
 import Image from 'next/image'
 import fonts from '../../styles/Fonts.module.css'
 import styled from 'styled-components'
+import { saveAs } from 'file-saver';
 
 const StyledTD = styled.td`
 	cursor: ${(props) => props.active === 'undo' || props.active === '' ? 'default' : `url(${props.cursorIcon}), auto`};
@@ -24,7 +25,8 @@ const StyledTD = styled.td`
 
 export default function Container() {
 
-	const [windowWidth, setWindowWidth] = useState(0);
+	
+	const [fileName, setFileName] = useState('Untitled');
 	const [showMain, setShowMain] = useState(true);
 	const [showErrorMessage, setShowErrorMessage] = useState(false);
 	const [errorMessage, setMessage] = useState('');
@@ -183,10 +185,24 @@ export default function Container() {
 		}
 	};
 
+	const handleFileNameChange = (e) => {
+		setFileName(e.target.value);
+	};
+
+	const handleDownload = () => {
+		let data = [];
+		for(let i=0; i<numberOfRows; i++) {
+			for(let j=0; j<numberOfCols; j++) {
+				data.push({ coordinates: {row: i, col: j}, images: tableData[i][j]});
+			}
+		}
+		const file = new Blob([JSON.stringify(data)], { type: 'text/plain;charset=utf-8' });
+    	saveAs(file, `${fileName}.json`);
+	};
+
 	useEffect(() => {
 		updateTableDimensions();
-	}, [numberOfRows, numberOfCols]);
-	
+	}, [numberOfRows, numberOfCols]);	
 	
 	useEffect(() => {
 		window.addEventListener('mouseup', handleMouseUp);
@@ -195,7 +211,6 @@ export default function Container() {
 			window.removeEventListener('mouseup', handleMouseUp);
 		};
 	}, [tableData]);
-	
 	
 	useEffect(() => {
 		window.addEventListener('keydown', handleUndoKeyDown);
@@ -256,8 +271,13 @@ export default function Container() {
 				</span>
 					
 					{active === 'settings' &&
-					<div className='rounded-md px-3 pt-1 w-[15%] h-[250px] bg-[#212121] absolute top-[3.2rem] right-[1rem]'>
-						<p className={`${fonts.montSerratMedium} text-[#bbb] text-xl px-3`}> LAYOUT GRID </p>
+					<div className='rounded-md px-3 pt-1 w-[15%] h-[420px] bg-[#212121] absolute top-[3.2rem] right-[1rem]'>
+						<p className={`${fonts.montSerratMedium} text-[#bbb] text-xl px-1`}> EXPORT JSON </p>
+						<input type="text" className='border-[1px] border-[#bbb] w-[98%] h-[40px] bg-black rounded-md mx-1 px-3 my-3 text-xl text-white' value={fileName} onChange={handleFileNameChange} />
+					<button className={`${fonts.montSerratMedium} w-[98%] h-[40px] bg-[#2867df] hover:text-black transition-all duration-500 hover:border-2 hover:border-[#2867df] hover:bg-white rounded-md mx-1 px-3 my-3 text-white`} onClick={handleDownload}> DOWNLOAD </button>
+						<hr className='border-[1px] border-[#bbb] my-3 w-[100%]'/>
+
+						<p className={`${fonts.montSerratMedium} text-[#bbb] text-xl px-1`}> LAYOUT GRID </p>
 						
 						<div className='flex gap-3'>
 							<span>
